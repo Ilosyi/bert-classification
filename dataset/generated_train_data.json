@@ -1,0 +1,242 @@
+[
+  {
+    "question": "分析核能与能源安全的关系。",
+    "label": 1
+  },
+  {
+    "question": "互联网是谁发明的？",
+    "label": 0
+  },
+  {
+    "question": "分析核能与能源安全的关系。",
+    "label": 1
+  },
+  {
+    "question": "电脑是什么？",
+    "label": 0
+  },
+  {
+    "question": "评价社交媒体在解决心理健康问题中的效果。",
+    "label": 1
+  },
+  {
+    "question": "大脑在哪里？",
+    "label": 0
+  },
+  {
+    "question": "论述大数据在决策过程中的应用。",
+    "label": 1
+  },
+  {
+    "question": "肌肉有多少个？",
+    "label": 0
+  },
+  {
+    "question": "比较基因编辑和伦理问题的异同。",
+    "label": 1
+  },
+  {
+    "question": "太空探索与资源分配之间存在什么矛盾？如何解决？",
+    "label": 1
+  },
+  {
+    "question": "森林的作用是什么？",
+    "label": 0
+  },
+  {
+    "question": "手机的作用是什么？",
+    "label": 0
+  },
+  {
+    "question": "地震是什么？",
+    "label": 0
+  },
+  {
+    "question": "为什么基因编辑会导致伦理问题？",
+    "label": 1
+  },
+  {
+    "question": "抗生素有多少个？",
+    "label": 0
+  },
+  {
+    "question": "植物光合作用的特点是什么？",
+    "label": 0
+  },
+  {
+    "question": "火山的特点是什么？",
+    "label": 0
+  },
+  {
+    "question": "手机的定义是什么？",
+    "label": 0
+  },
+  {
+    "question": "人工智能与就业市场之间存在什么矛盾？如何解决？",
+    "label": 1
+  },
+  {
+    "question": "肌肉在哪里？",
+    "label": 0
+  },
+  {
+    "question": "如何评价城市化对生态环境的影响？",
+    "label": 1
+  },
+  {
+    "question": "货币有多少个？",
+    "label": 0
+  },
+  {
+    "question": "动物细胞是哪一年开始的？",
+    "label": 0
+  },
+  {
+    "question": "评价虚拟现实在解决教育方法问题中的效果。",
+    "label": 1
+  },
+  {
+    "question": "可再生能源对环境保护的作用机制是什么？",
+    "label": 1
+  },
+  {
+    "question": "手机的定义是什么？",
+    "label": 0
+  },
+  {
+    "question": "海洋的作用是什么？",
+    "label": 0
+  },
+  {
+    "question": "元素周期表在哪里？",
+    "label": 0
+  },
+  {
+    "question": "骨骼是哪一年开始的？",
+    "label": 0
+  },
+  {
+    "question": "论述太空探索在资源分配中的应用。",
+    "label": 1
+  },
+  {
+    "question": "机器学习如何改变数据隐私的发展？",
+    "label": 1
+  },
+  {
+    "question": "学校的定义是什么？",
+    "label": 0
+  },
+  {
+    "question": "分析人口老龄化与社会保障的关系。",
+    "label": 1
+  },
+  {
+    "question": "工业革命是什么？",
+    "label": 0
+  },
+  {
+    "question": "全球化与文化多样性之间存在什么矛盾？如何解决？",
+    "label": 1
+  },
+  {
+    "question": "人口老龄化如何改变社会保障的发展？",
+    "label": 1
+  },
+  {
+    "question": "太阳系是谁发明的？",
+    "label": 0
+  },
+  {
+    "question": "从机器学习角度分析数据隐私问题。",
+    "label": 1
+  },
+  {
+    "question": "自动驾驶对交通安全的作用机制是什么？",
+    "label": 1
+  },
+  {
+    "question": "基因编辑对伦理问题的作用机制是什么？",
+    "label": 1
+  },
+  {
+    "question": "评价大数据在解决决策过程问题中的效果。",
+    "label": 1
+  },
+  {
+    "question": "工业革命的定义是什么？",
+    "label": 0
+  },
+  {
+    "question": "心脏的历史是什么？",
+    "label": 0
+  },
+  {
+    "question": "生物技术与医疗发展之间存在什么矛盾？如何解决？",
+    "label": 1
+  },
+  {
+    "question": "心脏是哪一年开始的？",
+    "label": 0
+  },
+  {
+    "question": "分析自动驾驶与交通安全的关系。",
+    "label": 1
+  },
+  {
+    "question": "为什么人工智能会导致就业市场？",
+    "label": 1
+  },
+  {
+    "question": "医院是谁发明的？",
+    "label": 0
+  },
+  {
+    "question": "历史事件在哪里？",
+    "label": 0
+  },
+  {
+    "question": "心脏在哪里？",
+    "label": 0
+  },
+  {
+    "question": "比较基因编辑和伦理问题的异同。",
+    "label": 1
+  },
+  {
+    "question": "社交媒体对心理健康的作用机制是什么？",
+    "label": 1
+  },
+  {
+    "question": "元素周期表有多少个？",
+    "label": 0
+  },
+  {
+    "question": "如何评价可再生能源对环境保护的影响？",
+    "label": 1
+  },
+  {
+    "question": "论述区块链在金融体系中的应用。",
+    "label": 1
+  },
+  {
+    "question": "货币是什么？",
+    "label": 0
+  },
+  {
+    "question": "分析区块链与金融体系的关系。",
+    "label": 1
+  },
+  {
+    "question": "恐龙的历史是什么？",
+    "label": 0
+  },
+  {
+    "question": "为什么社交媒体会导致心理健康？",
+    "label": 1
+  },
+  {
+    "question": "比较人工智能和就业市场的异同。",
+    "label": 1
+  }
+]
