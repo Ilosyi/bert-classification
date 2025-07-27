@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>llama.cpp 聊天助手</title>
+    <style>
+        body { margin: 0; font-family: "微软雅黑", Arial, sans-serif; background: #fafbfc; }
+        .main { display: flex; height: 100vh; }
+        .sidebar {
+            width: 260px; background: #f4f4f4; border-right: 1px solid #e0e0e0;
+            display: flex; flex-direction: column; padding: 0 0 10px 0;
+        }
+        .sidebar h2 { font-size: 20px; margin: 24px 0 12px 24px; }
+        .convs { flex: 1; overflow-y: auto; }
+        .conv-item {
+            padding: 12px 24px; cursor: pointer; border-bottom: 1px solid #eee;
+            color: #333; background: none;
+        }
+        .conv-item.active, .conv-item:hover { background: #e6eaf0; }
+        .chat-area { flex: 1; display: flex; flex-direction: column; }
+        .chat-history { flex: 1; padding: 32px 0 0 0; overflow-y: auto; }
+        .msg-row { display: flex; margin-bottom: 18px; }
+        .msg-row.user { justify-content: flex-end; }
+        .msg-bubble {
+            max-width: 60%; padding: 14px 18px; border-radius: 12px;
+            background: #fff; box-shadow: 0 2px 8px #0001; font-size: 16px;
+            word-break: break-all; position: relative;
+        }
+        .msg-row.user .msg-bubble { background: #e6f0ff; color: #222; }
+        .msg-label { font-size: 13px; color: #888; margin-bottom: 2px; }
+        .thought-box { margin-top: 6px; background: #f6f6f6; border-radius: 8px; padding: 8px 12px; font-size: 14px; color: #555; }
+        .toggle-thought { cursor: pointer; color: #007bff; font-size: 13px; margin-left: 6px; }
+        .input-bar {
+            display: flex; padding: 18px 24px; border-top: 1px solid #e0e0e0; background: #fff;
+        }
+        .input-bar textarea {
+            flex: 1; resize: none; font-size: 16px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;
+        }
+        .input-bar button {
+            margin-left: 12px; padding: 0 28px; font-size: 16px; border-radius: 6px; border: none; background: #6c63ff; color: #fff; cursor: pointer;
+        }
+        .input-bar button:active { background: #554fd8; }
+    </style>
+</head>
+<body>
+<div class="main">
+    <div class="sidebar">
+        <h2>Conversations</h2>
+        <div class="convs" id="convs"></div>
+        <button style="margin: 12px 24px 0 24px; padding: 8px 0; border-radius: 6px; border: none; background: #6c63ff; color: #fff; font-size: 15px; cursor: pointer;" onclick="newConv()">+ New conversation</button>
+    </div>
+    <div class="chat-area">
+        <div class="chat-history" id="chat"></div>
+        <div class="input-bar">
+            <textarea id="question" rows="1" placeholder="Type a message (Shift+Enter 换行)"></textarea>
+            <button onclick="ask()">Send</button>
+        </div>
+    </div>
+</div>
+<script>
+let conversations = JSON.parse(localStorage.getItem('convs') || '[]');
+let currentConv = conversations.length ? 0 : -1;
+function renderConvs() {
+    let convs = document.getElementById('convs');
+    convs.innerHTML = '';
+    conversations.forEach((conv, idx) => {
+        let div = document.createElement('div');
+        div.className = 'conv-item' + (idx === currentConv ? ' active' : '');
+        div.innerText = conv.title || (conv.history[0]?.q || '新会话');
+        div.onclick = () => { currentConv = idx; renderConvs(); renderChat(); };
+        convs.appendChild(div);
+    });
+}
+function renderChat() {
+    let chat = document.getElementById('chat');
+    chat.innerHTML = '';
+    if (currentConv === -1) return;
+    let hist = conversations[currentConv].history;
+    hist.forEach(item => {
+        // 用户问题
+        let userRow = document.createElement('div');
+        userRow.className = 'msg-row user';
+        let userBubble = document.createElement('div');
+        userBubble.className = 'msg-bubble';
+        userBubble.innerText = item.q;
+        userRow.appendChild(userBubble);
+        chat.appendChild(userRow);
+        // AI 回答
+        let aiRow = document.createElement('div');
+        aiRow.className = 'msg-row';
+        let aiBubble = document.createElement('div');
+        aiBubble.className = 'msg-bubble';
+        let label = document.createElement('div');
+        label.className = 'msg-label';
+        label.innerText = 'llama.cpp';
+        aiBubble.appendChild(label);
+        // 思考过程可折叠
+        let thoughtDiv = document.createElement('div');
+        thoughtDiv.className = 'thought-box';
+        thoughtDiv.style.display = 'none';
+        thoughtDiv.innerText = item.thought;
+        let toggle = document.createElement('span');
+        toggle.className = 'toggle-thought';
+        toggle.innerText = 'Thought Process ▼';
+        toggle.onclick = function() {
+            if (thoughtDiv.style.display === 'none') {
+                thoughtDiv.style.display = '';
+                toggle.innerText = 'Thought Process ▲';
+            } else {
+                thoughtDiv.style.display = 'none';
+                toggle.innerText = 'Thought Process ▼';
+            }
+        };
+        aiBubble.appendChild(toggle);
+        aiBubble.appendChild(thoughtDiv);
+        let answerDiv = document.createElement('div');
+        answerDiv.style.marginTop = '8px';
+        answerDiv.innerText = item.a;
+        aiBubble.appendChild(answerDiv);
+        aiRow.appendChild(aiBubble);
+        chat.appendChild(aiRow);
+    });
+    chat.scrollTop = chat.scrollHeight;
+}
+function ask() {
+    let q = document.getElementById('question').value.trim();
+    if (!q) return;
+    document.getElementById('question').value = '';
+    if (currentConv === -1) {
+        conversations.push({title: '', history: []});
+        currentConv = conversations.length - 1;
+    }
+    let hist = conversations[currentConv].history;
+    hist.push({q, a: '...', thought: ''});
+    renderChat();
+    fetch('/qa', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({question: q})
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.error) { alert(data.error); hist[hist.length-1].a = '[错误]'; renderChat(); return; }
+        hist[hist.length-1].a = data.answer;
+        hist[hist.length-1].thought = data.thought;
+        if (!conversations[currentConv].title) conversations[currentConv].title = q;
+        localStorage.setItem('convs', JSON.stringify(conversations));
+        renderConvs();
+        renderChat();
+    })
+    .catch(e => { hist[hist.length-1].a = '[请求失败]'; renderChat(); });
+}
+function newConv() {
+    conversations.push({title: '', history: []});
+    currentConv = conversations.length - 1;
+    renderConvs();
+    renderChat();
+}
+renderConvs();
+renderChat();
+// 支持 Shift+Enter 换行，Enter 发送
+document.getElementById('question').addEventListener('keydown', function(e){
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        ask();
+    }
+});
+</script>
+</body>
+</html>
