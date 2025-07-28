@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <title>llama.cpp 聊天助手</title>
+    <title>端云协同问答系统</title>
     <style>
         body { margin: 0; font-family: "微软雅黑", Arial, sans-serif; background: #fafbfc; }
         .main { display: flex; height: 100vh; }
@@ -28,6 +28,12 @@
         }
         .msg-row.user .msg-bubble { background: #e6f0ff; color: #222; }
         .msg-label { font-size: 13px; color: #888; margin-bottom: 2px; }
+        .model-tag {
+            display: inline-block; padding: 2px 8px; border-radius: 4px; 
+            font-size: 11px; font-weight: bold; margin-right: 8px;
+        }
+        .model-local { background: #e8f5e8; color: #2d5a2d; }
+        .model-cloud { background: #e8f0ff; color: #2d4a7a; }
         .thought-box { margin-top: 6px; background: #f6f6f6; border-radius: 8px; padding: 8px 12px; font-size: 14px; color: #555; }
         .toggle-thought { cursor: pointer; color: #007bff; font-size: 13px; margin-left: 6px; }
         .input-bar {
@@ -40,37 +46,48 @@
             margin-left: 12px; padding: 0 28px; font-size: 16px; border-radius: 6px; border: none; background: #6c63ff; color: #fff; cursor: pointer;
         }
         .input-bar button:active { background: #554fd8; }
+        .status-info {
+            background: #f0f8ff; border: 1px solid #b3d9ff; border-radius: 6px; 
+            padding: 8px 12px; margin: 12px 24px; font-size: 14px; color: #0066cc;
+        }
     </style>
 </head>
 <body>
 <div class="main">
     <div class="sidebar">
-        <h2>Conversations</h2>
+        <h2>对话历史</h2>
+        <div class="status-info">
+            <strong>端云协同系统</strong><br>
+            简单问题 → 本地模型<br>
+            复杂问题 → 云端DeepSeek
+        </div>
         <div class="convs" id="convs"></div>
-        <button style="margin: 12px 24px 0 24px; padding: 8px 0; border-radius: 6px; border: none; background: #6c63ff; color: #fff; font-size: 15px; cursor: pointer;" onclick="newConv()">+ New conversation</button>
+        <button style="margin: 12px 24px 0 24px; padding: 8px 0; border-radius: 6px; border: none; background: #6c63ff; color: #fff; font-size: 15px; cursor: pointer;" onclick="newConv()">+ 新对话</button>
     </div>
     <div class="chat-area">
         <div class="chat-history" id="chat"></div>
         <div class="input-bar">
-            <textarea id="question" rows="1" placeholder="Type a message (Shift+Enter 换行)"></textarea>
-            <button onclick="ask()">Send</button>
+            <textarea id="question" rows="1" placeholder="输入问题 (Shift+Enter 换行)"></textarea>
+            <button onclick="ask()">发送</button>
         </div>
     </div>
 </div>
 <script>
 let conversations = JSON.parse(localStorage.getItem('convs') || '[]');
 let currentConv = conversations.length ? 0 : -1;
+
 function renderConvs() {
     let convs = document.getElementById('convs');
     convs.innerHTML = '';
     conversations.forEach((conv, idx) => {
         let div = document.createElement('div');
         div.className = 'conv-item' + (idx === currentConv ? ' active' : '');
-        div.innerText = conv.title || (conv.history[0]?.q || '新会话');
+        div.innerText = conv.title || (conv.history[0]?.q || '新对话');
         div.onclick = () => { currentConv = idx; renderConvs(); renderChat(); };
         convs.appendChild(div);
     });
 }
+
 function renderChat() {
     let chat = document.getElementById('chat');
     chat.innerHTML = '';
@@ -85,34 +102,45 @@ function renderChat() {
         userBubble.innerText = item.q;
         userRow.appendChild(userBubble);
         chat.appendChild(userRow);
+        
         // AI 回答
         let aiRow = document.createElement('div');
         aiRow.className = 'msg-row';
         let aiBubble = document.createElement('div');
         aiBubble.className = 'msg-bubble';
+        
+        // 模型标签
         let label = document.createElement('div');
         label.className = 'msg-label';
-        label.innerText = 'llama.cpp';
+        let modelTag = document.createElement('span');
+        modelTag.className = 'model-tag ' + (item.type === '简单问题' ? 'model-local' : 'model-cloud');
+        modelTag.innerText = item.type === '简单问题' ? '本地模型' : '云端DeepSeek';
+        label.appendChild(modelTag);
+        label.appendChild(document.createTextNode(item.type === '简单问题' ? 'llama.cpp' : 'DeepSeek API'));
         aiBubble.appendChild(label);
+        
         // 思考过程可折叠
-        let thoughtDiv = document.createElement('div');
-        thoughtDiv.className = 'thought-box';
-        thoughtDiv.style.display = 'none';
-        thoughtDiv.innerText = item.thought;
-        let toggle = document.createElement('span');
-        toggle.className = 'toggle-thought';
-        toggle.innerText = 'Thought Process ▼';
-        toggle.onclick = function() {
-            if (thoughtDiv.style.display === 'none') {
-                thoughtDiv.style.display = '';
-                toggle.innerText = 'Thought Process ▲';
-            } else {
-                thoughtDiv.style.display = 'none';
-                toggle.innerText = 'Thought Process ▼';
-            }
-        };
-        aiBubble.appendChild(toggle);
-        aiBubble.appendChild(thoughtDiv);
+        if (item.thought) {
+            let thoughtDiv = document.createElement('div');
+            thoughtDiv.className = 'thought-box';
+            thoughtDiv.style.display = 'none';
+            thoughtDiv.innerText = item.thought;
+            let toggle = document.createElement('span');
+            toggle.className = 'toggle-thought';
+            toggle.innerText = '处理过程 ▼';
+            toggle.onclick = function() {
+                if (thoughtDiv.style.display === 'none') {
+                    thoughtDiv.style.display = '';
+                    toggle.innerText = '处理过程 ▲';
+                } else {
+                    thoughtDiv.style.display = 'none';
+                    toggle.innerText = '处理过程 ▼';
+                }
+            };
+            aiBubble.appendChild(toggle);
+            aiBubble.appendChild(thoughtDiv);
+        }
+        
         let answerDiv = document.createElement('div');
         answerDiv.style.marginTop = '8px';
         answerDiv.innerText = item.a;
@@ -122,6 +150,7 @@ function renderChat() {
     });
     chat.scrollTop = chat.scrollHeight;
 }
+
 function ask() {
     let q = document.getElementById('question').value.trim();
     if (!q) return;
@@ -131,8 +160,9 @@ function ask() {
         currentConv = conversations.length - 1;
     }
     let hist = conversations[currentConv].history;
-    hist.push({q, a: '...', thought: ''});
+    hist.push({q, a: '...', thought: '', type: ''});
     renderChat();
+    
     fetch('/qa', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -140,24 +170,36 @@ function ask() {
     })
     .then(r => r.json())
     .then(data => {
-        if (data.error) { alert(data.error); hist[hist.length-1].a = '[错误]'; renderChat(); return; }
+        if (data.error) { 
+            alert(data.error); 
+            hist[hist.length-1].a = '[错误]'; 
+            renderChat(); 
+            return; 
+        }
         hist[hist.length-1].a = data.answer;
         hist[hist.length-1].thought = data.thought;
+        hist[hist.length-1].type = data.type;
         if (!conversations[currentConv].title) conversations[currentConv].title = q;
         localStorage.setItem('convs', JSON.stringify(conversations));
         renderConvs();
         renderChat();
     })
-    .catch(e => { hist[hist.length-1].a = '[请求失败]'; renderChat(); });
+    .catch(e => { 
+        hist[hist.length-1].a = '[请求失败]'; 
+        renderChat(); 
+    });
 }
+
 function newConv() {
     conversations.push({title: '', history: []});
     currentConv = conversations.length - 1;
     renderConvs();
     renderChat();
 }
+
 renderConvs();
 renderChat();
+
 // 支持 Shift+Enter 换行，Enter 发送
 document.getElementById('question').addEventListener('keydown', function(e){
     if (e.key === 'Enter' && !e.shiftKey) {
