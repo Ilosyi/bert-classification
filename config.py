@@ -2,7 +2,7 @@
 import os
 
 # DeepSeek API 配置
-DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY', 'sk-90b9bfa6d6b94c20874f04b6f55b315c')  # 从环境变量读取，如果没有则使用默认值
+DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY', 'sk-000')  # 从环境变量读取，如果没有则使用默认值
 DEEPSEEK_URL = "https://api.deepseek.com/chat/completions"
 
 # 本地模型配置
